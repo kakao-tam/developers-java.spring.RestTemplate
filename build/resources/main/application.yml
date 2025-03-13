@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: demo
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8080
+
+kakao:
+  client-id: 4408b5bb51bdf4c89879e933556a21e8
+  client-secret: ${KAKAO_CLIENT_SECRET:your_client_secret_here}
+  redirect-uri: http://localhost:8080/api/kakao/redirect
+  kauth-host: https://kauth.kakao.com
+  kapi-host: https://kapi.kakao.com
