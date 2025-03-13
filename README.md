@@ -50,3 +50,7 @@
 - API 호출 시 발생하는 에러 메시지를 클라이언트에 전달
 - HTTP 상태 코드별 에러 응답 처리
 - 세션 기반의 토큰 관리
+
+## 스크린샷
+<img width="816" alt="image" src="https://github.com/user-attachments/assets/e31e71d8-f8c4-4759-94f3-439834741433" />
+
