@@ -32,7 +32,7 @@
 1. [카카오 개발자 콘솔](https://developers.kakao.com)에서 애플리케이션 생성
 2. 카카오 로그인 활성화
 3. Redirect URI 설정: http://localhost:8080/api/kakao/redirect
-4. JavaScript 키와 REST API 키를 `application.yml`에 설정
+4. REST API 키를 `application.yml`에 설정 (Javascript 키를 `index.html`에 설정)
 
 ## 주요 기능
 
