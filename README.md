@@ -13,11 +13,19 @@
 ## 시작하기
 
 1. 프로젝트 클론
-2. 애플리케이션 실행:
+2. Gradle 의존성 리프레시 (필요한 경우):
+   ```bash
+   # Gradle Wrapper 초기화 (처음 한 번만)
+   gradle wrapper
+   
+   # 의존성 리프레시
+   ./gradlew --refresh-dependencies
+   ```
+3. 애플리케이션 실행:
    ```bash
    ./gradlew bootRun
    ```
-3. 브라우저에서 http://localhost:8080 접속
+4. 브라우저에서 http://localhost:8080 접속
 
 ## 카카오 API 설정
 
