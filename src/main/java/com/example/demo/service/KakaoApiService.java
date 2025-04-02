@@ -179,15 +179,6 @@ public class KakaoApiService {
 
             if (e instanceof org.springframework.web.client.HttpStatusCodeException) {
                 org.springframework.web.client.HttpStatusCodeException httpException = (org.springframework.web.client.HttpStatusCodeException) e;
-                System.out.println("response getMessage ::" + e.getMessage());
-                System.out.println("response getLocalizedMessage ::" + e.getLocalizedMessage());
-                System.out.println("response getResponseBodyAsString ::" + httpException.getResponseBodyAsString());
-                System.out.println("response getStatusCode ::" + httpException.getStatusCode());
-                System.out.println("response getStatusText ::" + httpException.getStatusText());
-                System.out.println("response getResponseHeaders ::" + httpException.getResponseHeaders());
-                System.out.println("response toString ::" + httpException.toString());
-                System.out.println("response e ::" + e);
-
                 return httpException.getResponseBodyAsString();
             }
 
