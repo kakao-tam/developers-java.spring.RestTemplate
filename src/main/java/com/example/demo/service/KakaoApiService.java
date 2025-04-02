@@ -26,6 +26,9 @@ public class KakaoApiService {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
+    @Value("${kakao.client-secret}")
+    private String clientSecret;
+
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
 
@@ -59,13 +62,14 @@ public class KakaoApiService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
         return false;
     }
 
     private KakaoTokenResponse getToken(String code) throws Exception {
-        String params = String.format("grant_type=authorization_code&client_id=%s&code=%s",
-                clientId, code);
+        String params = String.format("grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s",
+                clientId, clientSecret, code);
         String response = makeRequest(kauthHost + "/oauth/token", "POST", params);
         return objectMapper.readValue(response, KakaoTokenResponse.class);
     }
@@ -172,10 +176,21 @@ public class KakaoApiService {
                     String.class);
             return response.getBody();
         } catch (Exception e) {
+
             if (e instanceof org.springframework.web.client.HttpStatusCodeException) {
                 org.springframework.web.client.HttpStatusCodeException httpException = (org.springframework.web.client.HttpStatusCodeException) e;
+                System.out.println("response getMessage ::" + e.getMessage());
+                System.out.println("response getLocalizedMessage ::" + e.getLocalizedMessage());
+                System.out.println("response getResponseBodyAsString ::" + httpException.getResponseBodyAsString());
+                System.out.println("response getStatusCode ::" + httpException.getStatusCode());
+                System.out.println("response getStatusText ::" + httpException.getStatusText());
+                System.out.println("response getResponseHeaders ::" + httpException.getResponseHeaders());
+                System.out.println("response toString ::" + httpException.toString());
+                System.out.println("response e ::" + e);
+
                 return httpException.getResponseBodyAsString();
             }
+
             throw e;
         }
     }
