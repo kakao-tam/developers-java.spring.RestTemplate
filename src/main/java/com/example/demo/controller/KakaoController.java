@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
-@RequestMapping("/api/kakao")
 public class KakaoController {
 
     private final KakaoApiService kakaoApiService;

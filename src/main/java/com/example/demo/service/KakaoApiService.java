@@ -17,6 +17,9 @@ public class KakaoApiService {
     @Value("${kakao.client-id}")
     private String clientId;
 
+    @Value("${kakao.client-secret}")
+    private String clientSecret;
+
     @Value("${kakao.kauth-host}")
     private String kauthHost;
 
@@ -26,9 +29,6 @@ public class KakaoApiService {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
-    @Value("${kakao.client-secret}")
-    private String clientSecret;
-
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
 
@@ -37,9 +37,57 @@ public class KakaoApiService {
         this.restTemplate = restTemplate;
     }
 
+    public String createDefaultMessage() {
+        return "template_object={\"object_type\":\"text\",\"text\":\"Hello, world!\",\"link\":{\"web_url\":\"https://developers.kakao.com\",\"mobile_web_url\":\"https://developers.kakao.com\"}}";
+    }
+
     private HttpSession getSession() {
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         return attr.getRequest().getSession();
+    }
+
+    private void saveAccessToken(String accessToken) {
+        getSession().setAttribute("access_token", accessToken);
+    }
+
+    private String getAccessToken() {
+        return (String) getSession().getAttribute("access_token");
+    }
+
+    private void invalidateSession() {
+        getSession().invalidate();
+    }
+
+    private String call(String method, String urlString, String body) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(getAccessToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request;
+        if (body != null) {
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            request = new HttpEntity<>(body, headers);
+        } else {
+            request = new HttpEntity<>(headers);
+        }
+
+        HttpMethod httpMethod = HttpMethod.valueOf(method);
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    urlString,
+                    httpMethod,
+                    request,
+                    String.class);
+            return response.getBody();
+        } catch (Exception e) {
+
+            if (e instanceof org.springframework.web.client.HttpStatusCodeException) {
+                org.springframework.web.client.HttpStatusCodeException httpException = (org.springframework.web.client.HttpStatusCodeException) e;
+                return httpException.getResponseBodyAsString();
+            }
+
+            throw e;
+        }
     }
 
     public String getAuthUrl(String scope) {
@@ -70,25 +118,13 @@ public class KakaoApiService {
     private KakaoTokenResponse getToken(String code) throws Exception {
         String params = String.format("grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s",
                 clientId, clientSecret, code);
-        String response = makeRequest(kauthHost + "/oauth/token", "POST", params);
+        String response = call("POST", kauthHost + "/oauth/token", params);
         return objectMapper.readValue(response, KakaoTokenResponse.class);
-    }
-
-    private void saveAccessToken(String accessToken) {
-        getSession().setAttribute("access_token", accessToken);
-    }
-
-    private String getAccessToken() {
-        return (String) getSession().getAttribute("access_token");
-    }
-
-    private void invalidateSession() {
-        getSession().invalidate();
     }
 
     public ResponseEntity<?> getUserProfile() {
         try {
-            String response = makeRequest(kapiHost + "/v2/user/me", "GET", null);
+            String response = call("GET", kapiHost + "/v2/user/me", null);
             return ResponseEntity.ok(objectMapper.readValue(response, Object.class));
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,7 +134,7 @@ public class KakaoApiService {
 
     public ResponseEntity<?> getFriends() {
         try {
-            String response = makeRequest(kapiHost + "/v1/api/talk/friends", "GET", null);
+            String response = call("GET", kapiHost + "/v1/api/talk/friends", null);
             return ResponseEntity.ok(objectMapper.readValue(response, Object.class));
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,7 +144,7 @@ public class KakaoApiService {
 
     public ResponseEntity<?> sendMessage(String messageRequest) {
         try {
-            String response = makeRequest(kapiHost + "/v2/api/talk/memo/default/send", "POST", messageRequest);
+            String response = call("POST", kapiHost + "/v2/api/talk/memo/default/send", messageRequest);
             return ResponseEntity.ok(objectMapper.readValue(response, Object.class));
         } catch (Exception e) {
             e.printStackTrace();
@@ -118,8 +154,8 @@ public class KakaoApiService {
 
     public ResponseEntity<?> sendMessageToFriend(String uuid, String messageRequest) {
         try {
-            String response = makeRequest(
-                    kapiHost + "/v1/api/talk/friends/message/default/send?receiver_uuids=[" + uuid + "]", "POST",
+            String response = call("POST",
+                    kapiHost + "/v1/api/talk/friends/message/default/send?receiver_uuids=[" + uuid + "]",
                     messageRequest);
             return ResponseEntity.ok(objectMapper.readValue(response, Object.class));
         } catch (Exception e) {
@@ -130,7 +166,7 @@ public class KakaoApiService {
 
     public ResponseEntity<?> logout() {
         try {
-            String response = makeRequest(kapiHost + "/v1/user/logout", "POST", null);
+            String response = call("POST", kapiHost + "/v1/user/logout", null);
             invalidateSession();
             return ResponseEntity.ok(objectMapper.readValue(response, Object.class));
         } catch (Exception e) {
@@ -141,48 +177,12 @@ public class KakaoApiService {
 
     public ResponseEntity<?> unlink() {
         try {
-            String response = makeRequest(kapiHost + "/v1/user/unlink", "POST", null);
+            String response = call("POST", kapiHost + "/v1/user/unlink", null);
             invalidateSession();
             return ResponseEntity.ok(objectMapper.readValue(response, Object.class));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    public String createDefaultMessage() {
-        return "template_object={\"object_type\":\"text\",\"text\":\"Hello, world!\",\"link\":{\"web_url\":\"https://developers.kakao.com\",\"mobile_web_url\":\"https://developers.kakao.com\"}}";
-    }
-
-    private String makeRequest(String urlString, String method, String body) throws Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(getAccessToken());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> request;
-        if (body != null) {
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            request = new HttpEntity<>(body, headers);
-        } else {
-            request = new HttpEntity<>(headers);
-        }
-
-        HttpMethod httpMethod = HttpMethod.valueOf(method);
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    urlString,
-                    httpMethod,
-                    request,
-                    String.class);
-            return response.getBody();
-        } catch (Exception e) {
-
-            if (e instanceof org.springframework.web.client.HttpStatusCodeException) {
-                org.springframework.web.client.HttpStatusCodeException httpException = (org.springframework.web.client.HttpStatusCodeException) e;
-                return httpException.getResponseBodyAsString();
-            }
-
-            throw e;
         }
     }
 }
