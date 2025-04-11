@@ -1,64 +1,73 @@
-# Spring Boot 카카오 API 연동 프로젝트
+# Kakao REST API Java Spring RestTemplate 예제
 
-이 프로젝트는 Spring Boot를 사용하여 카카오 API를 연동하는 예제 프로젝트입니다.
-
-## 기술 스택
-
-- Java 21
-- Spring Boot 3.2.3
-- Gradle 8.x
-- Lombok
-- Spring Validation
-
-## 시작하기
-
-1. 프로젝트 클론
-2. Gradle 의존성 리프레시 (필요한 경우):
-   ```bash
-   # Gradle Wrapper 초기화 (처음 한 번만)
-   gradle wrapper
-   
-   # 의존성 리프레시
-   ./gradlew --refresh-dependencies
-   ```
-3. 애플리케이션 실행:
-   ```bash
-   ./gradlew bootRun
-   ```
-4. 브라우저에서 http://localhost:8080 접속
-
-## 카카오 API 설정
-
-1. [카카오 개발자 콘솔](https://developers.kakao.com)에서 애플리케이션 생성
-2. 카카오 로그인 활성화
-3. Redirect URI 설정: http://localhost:8080/api/kakao/redirect
-4. REST API 키를 `application.yml`에 설정 (Javascript 키를 `index.html`에 설정)
+이 프로젝트는 Kakao REST API를 Java Spring RestTemplate로 구현한 예제입니다.
 
 ## 주요 기능
 
 - 카카오 로그인
-- 사용자 프로필 조회
-- 친구 목록 조회
-- 카카오톡 메시지 전송
+- 사용자 정보 가져오기
+- 친구 목록 가져오기
+- 나에게 메시지 발송
+- 친구에게 메시지 발송
 - 로그아웃
 - 연결 끊기
 
-## API 엔드포인트
+## 프로젝트 구조
+```
+.
+│
+├── /src/resources/static/index.html # 메인 HTML 파일
+└── /src/resources/static/style.css # 스타일시트
+├── src/main/java/com/example/demo/controller/KakaoController.java # 컨트롤러 파일
+├── src/main/java/com/example/demo/service/KakaoApiService.java # 서비스 파일
+├── src/main/resources/application.yml # 설정 파일
+└── README.md # 프로젝트 설명 파일
+```
 
-- `/api/kakao/authorize`: 카카오 로그인 인증
-- `/api/kakao/redirect`: 카카오 로그인 콜백
-- `/api/kakao/profile`: 사용자 프로필 조회
-- `/api/kakao/friends`: 친구 목록 조회
-- `/api/kakao/message`: 카카오톡 메시지 전송
-- `/api/kakao/logout`: 로그아웃
-- `/api/kakao/unlink`: 연결 끊기
+## 설치 방법
 
-## 에러 처리
+1. 프로젝트 클론
+```bash
+git clone [repository-url]
+cd [project-directory]
+```
 
-- API 호출 시 발생하는 에러 메시지를 클라이언트에 전달
-- HTTP 상태 코드별 에러 응답 처리
-- 세션 기반의 토큰 관리
+2. 의존성 설치
+```bash
+gradle wrapper
+./gradlew build       # macOS/Linux
+gradlew.bat build     # Windows
+```
+
+3. 카카오 개발자 설정
+- [Kakao Developers](https://developers.kakao.com)에서 애플리케이션 생성
+- `application.properties`의 `client-id`와 `client-secret`을 발급받은 값으로 변경
+- 카카오 개발자 콘솔의 "카카오 로그인 > 플랫폼 > Web 플랫폼"에서 사이트 도메인을 등록합니다.
+- 카카오 개발자 콘솔의 "카카오 로그인 > 카카오 로그인 활성화"를 ON으로 설정합니다.
+- Redirect URI 설정: `http://localhost:8080/api/kakao/redirect`
+
+4. 서버 실행
+```bash
+./gradlew bootRun
+```
+
+## 사용 방법
+
+1. 브라우저에서 `http://localhost:8080` 접속
+2. 카카오 로그인 버튼 클릭
+3. 각 기능 버튼을 통해 API 테스트
+
+## 주의사항
+
+- 카카오 로그인 Redirect URI가 정확히 설정되어 있어야 합니다.
+- 친구 목록 조회와 메시지 발송을 위해서는 추가 동의가 필요합니다.
+
+## 의존성
+
+- Spring Boot: 2.7.0
+- Spring Web
+- Spring Security
+- Jackson
 
 ## 스크린샷
-<img width="816" alt="image" src="https://github.com/user-attachments/assets/e31e71d8-f8c4-4759-94f3-439834741433" />
-
+![image](https://github.com/user-attachments/assets/a64d2a83-c036-4cb2-88e5-07bba3890ec3)
